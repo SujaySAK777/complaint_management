@@ -15,7 +15,7 @@ nltk.download('vader_lexicon')
 app = Flask(__name__)
 
 # Set up the database URI
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://username:password@localhost/complaint_system'  # Replace with actual credentials
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://username:password@localhost/database_name'  # Replace with actual credentials
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'your_secret_key_here'  # Update with a secure secret key
 db = SQLAlchemy(app)
@@ -30,7 +30,7 @@ class Citizen(db.Model):
     email = db.Column(db.String(100), nullable=False, unique=True)
     address = db.Column(db.String(200), nullable=True)
     gender = db.Column(db.String(10), nullable=True)
-
+    password = db.Column(db.String(100), nullable=True)
     complaints = db.relationship('Complaint', backref='citizen', lazy=True)
 
 class Complaint(db.Model):
@@ -53,6 +53,7 @@ class Department(db.Model):
     contact_number = db.Column(db.String(15), unique=True)
     email = db.Column(db.String(50), unique=True)
     address = db.Column(db.String(100))
+    password = db.Column(db.String(100))
 
 class ComplaintLog(db.Model):
     __tablename__ = 'complaint_log'
@@ -81,8 +82,17 @@ def citizen_register():
         email = request.form['email']
         address = request.form['address']
         gender = request.form['gender']
-
-        new_citizen = Citizen(name=name, contact_number=contact_number, email=email, address=address, gender=gender)
+        password = request.form['password']  # Capture password from the form
+        
+        # Create new citizen record
+        new_citizen = Citizen(
+            name=name, 
+            contact_number=contact_number, 
+            email=email, 
+            address=address, 
+            gender=gender, 
+            password=password  # Save password directly
+        )
         db.session.add(new_citizen)
         db.session.commit()
 
@@ -96,14 +106,16 @@ def citizen_login():
     error = None
     if request.method == 'POST':
         email = request.form['email']
-        contact_number = request.form['contact_number']
+        password = request.form['password']  # Capture password from the form
         
-        citizen = Citizen.query.filter_by(email=email, contact_number=contact_number).first()
-        if citizen:
+        # Fetch citizen by email and password
+        citizen = Citizen.query.filter_by(email=email, password=password).first()
+        
+        if citizen:  # Validate email and password
             session['citizen_id'] = citizen.citizen_id  # Store citizen ID in session
             return redirect(url_for('citizen_dashboard'))
         else:
-            error = 'Invalid login credentials. Please try again.'
+            error = 'Invalid email or password. Please try again.'
 
     return render_template('login.html', error=error)
 
@@ -161,8 +173,17 @@ def department_register():
         contact_number = request.form['contact_number']
         email = request.form['email']
         address = request.form['address']
+        password = request.form['password']  # Password entered by the user
 
-        new_department = Department(name=name, contact_person=contact_person, contact_number=contact_number, email=email, address=address)
+        # Create a new Department record
+        new_department = Department(
+            name=name,
+            contact_person=contact_person,
+            contact_number=contact_number,
+            email=email,
+            address=address,
+            password=password  # Store the plain text password (not recommended for production)
+        )
         db.session.add(new_department)
         db.session.commit()
 
@@ -176,16 +197,19 @@ def department_login():
     error = None
     if request.method == 'POST':
         email = request.form['email']
-        contact_number = request.form['contact_number']
-        
-        department = Department.query.filter_by(email=email, contact_number=contact_number).first()
+        password = request.form['password']  # Password entered by the user
+
+        # Query the database for a matching email and password
+        department = Department.query.filter_by(email=email, password=password).first()
         if department:
-            session['department_id'] = department.department_id  # Store department_id in session
+            # Store department_id in session
+            session['department_id'] = department.department_id
             return redirect(url_for('department_dashboard'))
         else:
             error = 'Invalid login credentials. Please try again.'
 
     return render_template('department_login.html', error=error)
+
 
 
 
