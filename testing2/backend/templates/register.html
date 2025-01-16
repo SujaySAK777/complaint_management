@@ -4,11 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Citizen Registration</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #f7f8fc, #e2ebf0);
+        }
+
+        header {
+            background-color: #004d99;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 1.5em;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #004d99;
+        }
+
+        button {
+            background-color: #004d99;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #003366;
+        }
+
+        .password-strength-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar div {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .weak-bar {
+            background-color: red;
+        }
+
+        .medium-bar {
+            background-color: orange;
+        }
+
+        .strong-bar {
+            background-color: green;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>Citizen Registration</h1>
+        Citizen Registration
     </header>
     <div class="container">
         <form method="POST" action="{{ url_for('citizen_register') }}">
@@ -30,9 +115,45 @@
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
             </select>
+            
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+            <div class="password-strength-bar">
+                <div id="password-bar"></div>
+            </div>
+
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
 
             <button type="submit">Register</button>
         </form>
     </div>
+
+    <script>
+        const passwordInput = document.getElementById('password');
+        const passwordBar = document.getElementById('password-bar');
+
+        passwordInput.addEventListener('input', () => {
+            const password = passwordInput.value;
+            let strength = 0;
+
+            if (password.length >= 6) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+
+            let barWidth = (strength / 5) * 100;
+            passwordBar.style.width = `${barWidth}%`;
+
+            if (strength <= 2) {
+                passwordBar.className = 'weak-bar';
+            } else if (strength <= 4) {
+                passwordBar.className = 'medium-bar';
+            } else {
+                passwordBar.className = 'strong-bar';
+            }
+        });
+    </script>
 </body>
 </html>
