@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--dark-gradient);
+        padding: 2rem;
+    }
+
+    .register-card {
+        width: 100%;
+        max-width: 500px;
+        background: rgba(20, 30, 48, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 198, 255, 0.2);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+    }
+
+    .register-title {
+        font-size: 2.5rem;
+        color: #00c6ff;
+        text-align: center;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .register-subtitle {
+        color: rgba(255, 255, 255, 0.7);
+        text-align: center;
+        margin-bottom: 2.5rem;
+        font-size: 1.1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(0, 198, 255, 0.2);
+        border-radius: 12px;
+        color: #fff;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #00c6ff;
+        box-shadow: 0 0 20px rgba(0, 198, 255, 0.2);
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #00c6ff, #0072ff);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 2rem;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 198, 255, 0.4);
+    }
+
+    .password-bar {
+        height: 6px;
+        width: 0;
+        background: #ff3b30;
+        border-radius: 12px;
+        transition: width 0.3s, background-color 0.3s;
+        margin-top: 8px;
+    }
+
+    .weak-bar {
+        background: #ff3b30;
+    }
+
+    .medium-bar {
+        background: #ffc107;
+    }
+
+    .strong-bar {
+        background: #28a745;
+    }
+
+    .error-message {
+        background: rgba(255, 59, 48, 0.1);
+        border: 1px solid rgba(255, 59, 48, 0.3);
+        color: #ff3b30;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .back-btn {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        padding: 0.8rem 1.5rem;
+        background: rgba(0, 198, 255, 0.1);
+        border: 1px solid rgba(0, 198, 255, 0.3);
+        border-radius: 8px;
+        color: white;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        z-index: 10;
+    }
+
+    .back-btn:hover {
+        background: rgba(0, 198, 255, 0.2);
+        transform: translateX(-5px);
+        box-shadow: 0 5px 20px rgba(0, 198, 255, 0.4);
+    }
+
+    .error-message.invalid-mobile {
+        display: none;
+        color: red;
+        margin-top: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('home') }}" class="back-btn">← Back to Home</a>
+
+<div class="register-container">
+    <div class="register-card">
+        <h1 class="register-title">Create Account</h1>
+        <p class="register-subtitle">Join our community and start filing complaints</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for category, message in messages %}
+                <div class="alert {{ category }}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('citizen_register') }}" id="register-form">
+            <div class="form-group">
+                <input type="text" 
+                       class="form-control" 
+                       id="name" 
+                       name="name" 
+                       placeholder="Full Name" 
+                       required>
+            </div>
+
+            <div class="form-group">
+                <input type="email" 
+                       class="form-control" 
+                       id="email" 
+                       name="email" 
+                       placeholder="Email Address" 
+                       required>
+            </div>
+
+            <div class="form-group">
+                <input type="text" 
+                       class="form-control" 
+                       id="contact_number" 
+                       name="contact_number" 
+                       placeholder="Contact Number" 
+                       required>
+                <div id="contact-number-error" class="error-message invalid-mobile">Invalid mobile number</div>
+            </div>
+
+            <div class="form-group">
+                <input type="text" 
+                       class="form-control" 
+                       id="address" 
+                       name="address" 
+                       placeholder="Address" 
+                       required>
+            </div>
+            
+            <div class="form-group">
+                <select class="form-control" id="gender" name="gender" required>
+                    <option value="" disabled selected>Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input type="password" 
+                       class="form-control" 
+                       id="password" 
+                       name="password" 
+                       placeholder="Password" 
+                       required>
+                <div class="password-bar" id="password-bar"></div>
+            </div>
+
+            <div class="form-group">
+                <input type="password" 
+                       class="form-control" 
+                       id="confirm_password" 
+                       name="confirm_password" 
+                       placeholder="Confirm Password" 
+                       required>
+            </div>
+
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <button type="submit" class="submit-btn">Register</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Password strength checker
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const passwordBar = document.getElementById('password-bar');
+
+    passwordInput.addEventListener('input', () => {
+        const password = passwordInput.value;
+        let strength = 0;
+
+        if (password.length >= 6) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/\d/.test(password)) strength++;
+        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+
+        const barWidth = (strength / 5) * 100;
+        passwordBar.style.width = `${barWidth}%`;
+
+        if (strength <= 2) {
+            passwordBar.className = 'password-bar weak-bar';
+        } else if (strength <= 4) {
+            passwordBar.className = 'password-bar medium-bar';
+        } else {
+            passwordBar.className = 'password-bar strong-bar';
+        }
+    });
+
+    confirmPasswordInput.addEventListener('input', () => {
+        const confirmPassword = confirmPasswordInput.value;
+        const password = passwordInput.value;
+
+        if (confirmPassword !== password) {
+            confirmPasswordInput.setCustomValidity("Passwords do not match");
+        } else {
+            confirmPasswordInput.setCustomValidity("");
+        }
+    });
+
+    // Mobile number validation
+    const contactInput = document.getElementById('contact_number');
+    const contactError = document.getElementById('contact-number-error');
+
+    contactInput.addEventListener('input', () => {
+        const value = contactInput.value;
+
+        const isValid = /^[0-9]{10}$/.test(value);
+
+        if (!isValid && value.length > 0) {
+            contactError.style.display = 'block';
+        } else {
+            contactError.style.display = 'none';
+        }
+    });
+
+    contactInput.addEventListener('blur', () => {
+        contactError.style.display = 'none';
+    });
+
+    contactInput.addEventListener('focus', () => {
+        const value = contactInput.value;
+        const isValid = /^[0-9]{10}$/.test(value);
+
+        if (!isValid && value.length > 0) {
+            contactError.style.display = 'block';
+        }
+    });
+</script>
+{% endblock %}

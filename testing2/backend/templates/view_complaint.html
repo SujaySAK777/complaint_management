@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Complaint</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .complaint-container {
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+            background: var(--dark-gradient);
+        }
+
+        .complaint-card {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .complaint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .complaint-id {
+            font-size: 1.2rem;
+            color: #00c6ff;
+        }
+
+        .complaint-date {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .complaint-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            color: #00c6ff;
+            margin-bottom: 1rem;
+        }
+
+        .description-text {
+            color: white;
+            line-height: 1.6;
+        }
+
+        .status-timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: -2.25rem;
+            top: 0;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: #00c6ff;
+            box-shadow: 0 0 10px rgba(0, 198, 255, 0.5);
+        }
+
+        .timeline-date {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-remarks {
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .department-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .department-badge {
+            padding: 0.5rem 1rem;
+            background: var(--primary-gradient);
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .priority-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .priority-HIGH {
+            background: linear-gradient(135deg, #ff3b30, #ff9500);
+        }
+
+        .priority-MEDIUM {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+        }
+
+        .priority-LOW {
+            background: linear-gradient(135deg, #34c759, #00c6ff);
+        }
+
+        @media (max-width: 768px) {
+            .complaint-container {
+                padding: 1rem;
+            }
+
+            .complaint-card {
+                margin: 1rem auto;
+                padding: 1.5rem;
+            }
+
+            .complaint-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .timeline-item {
+                padding-bottom: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="complaint-container">
+        <a href="{{ url_for('citizen_dashboard') }}" class="back-btn">← Back to Dashboard</a>
+
+        <div class="complaint-card">
+            <div class="complaint-header">
+                <div>
+                    <div class="complaint-id">Complaint #{{ complaint.complaint_id }}</div>
+                    <div class="complaint-date">Submitted on {{ complaint.date_submitted.strftime('%B %d, %Y') }}</div>
+                </div>
+                <div class="department-info">
+                    <div class="department-badge">{{ department_name }}</div>
+                    <div class="priority-badge priority-{{ complaint.priority }}">{{ complaint.priority }}</div>
+                </div>
+            </div>
+
+            <div class="complaint-section">
+                <h3 class="section-title">Complaint Description</h3>
+                <p class="description-text">{{ complaint.description }}</p>
+            </div>
+
+            <div class="complaint-section">
+                <h3 class="section-title">Status Timeline</h3>
+                <div class="status-timeline">
+                    {% for log in complaint.logs|sort(attribute='timestamp', reverse=true) %}
+                        <div class="timeline-item">
+                            <div class="timeline-date">{{ log.timestamp.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                            <div class="timeline-status">
+                                <span class="status-dot"></span>
+                                {{ log.status }}
+                            </div>
+                            {% if log.remarks %}
+                                <div class="timeline-remarks">{{ log.remarks }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
