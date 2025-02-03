@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+
+{% block title %}Complaint Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .home-container {
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+        background: var(--dark-gradient);
+        color: white;
+    }
+
+    .particles-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(0, 198, 255, 0.5);
+        border-radius: 50%;
+        animation: float 15s infinite linear;
+    }
+
+    .particle::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: inherit;
+        border-radius: inherit;
+        animation: pulse 2s infinite;
+    }
+
+    {% for i in range(30) %}
+    .particle:nth-child({{ i }}) {
+        top: {{ range(0, 100) | random }}%;
+        left: {{ range(0, 100) | random }}%;
+        animation-delay: -{{ range(0, 15) | random }}s;
+        animation-duration: {{ range(10, 20) | random }}s;
+        transform: scale({{ range(5, 15) | random / 10.0 }});
+        opacity: {{ range(3, 8) | random / 10.0 }};
+    }
+    {% endfor %}
+
+    .cyber-grid {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: 
+            linear-gradient(rgba(0, 198, 255, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 198, 255, 0.1) 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: moveGrid 20s linear infinite;
+        opacity: 0.3;
+        z-index: 0;
+    }
+
+    .hero-section {
+        position: relative;
+        padding: 4rem 2rem;
+        text-align: center;
+        z-index: 1;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #00c6ff, #0072ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: glow 2s ease-in-out infinite alternate;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s forwards;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 3rem;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s 0.2s forwards;
+    }
+
+    .cards-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2.5rem;
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+    }
+
+    .card {
+        background: rgba(20, 30, 48, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 198, 255, 0.2);
+        border-radius: 20px;
+        padding: 2.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        z-index: 2;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            45deg,
+            transparent,
+            rgba(0, 198, 255, 0.1),
+            transparent
+        );
+        transform: translateX(-100%);
+        transition: 0.6s;
+        z-index: 1;
+    }
+
+    .card:hover::before {
+        transform: translateX(100%);
+    }
+
+    .card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.2),
+            transparent
+        );
+        transition: 0.5s;
+    }
+
+    .card:hover::after {
+        left: 100%;
+    }
+
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 45px rgba(0, 198, 255, 0.2);
+        border-color: rgba(0, 198, 255, 0.5);
+    }
+
+    .card-title {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        color: #00c6ff;
+        font-weight: 600;
+        position: relative;
+        z-index: 2;
+    }
+
+    .card-content {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .card-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn {
+        padding: 0.8rem 2rem;
+        border: 1px solid rgba(0, 198, 255, 0.3);
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: white;
+        background: rgba(0, 198, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            rgba(0, 198, 255, 0.1),
+            rgba(0, 198, 255, 0.4)
+        );
+        transition: 0.5s ease;
+        z-index: -1;
+    }
+
+    .btn:hover::before {
+        width: 100%;
+    }
+
+    .btn:hover {
+        background: rgba(0, 198, 255, 0.2);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 198, 255, 0.3);
+    }
+
+    @keyframes float {
+        0% {
+            transform: translateY(0) translateX(0) rotate(0deg);
+        }
+        33% {
+            transform: translateY(-50px) translateX(50px) rotate(120deg);
+        }
+        66% {
+            transform: translateY(50px) translateX(-50px) rotate(240deg);
+        }
+        100% {
+            transform: translateY(0) translateX(0) rotate(360deg);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+        50% {
+            transform: scale(1.5);
+            opacity: 1;
+        }
+    }
+
+    @keyframes moveGrid {
+        0% {
+            transform: translateX(0) translateY(0);
+        }
+        100% {
+            transform: translateX(-50px) translateY(-50px);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes glow {
+        from {
+            text-shadow: 0 0 10px rgba(0, 198, 255, 0.5),
+                         0 0 20px rgba(0, 198, 255, 0.3),
+                         0 0 30px rgba(0, 198, 255, 0.1);
+        }
+        to {
+            text-shadow: 0 0 20px rgba(0, 198, 255, 0.8),
+                         0 0 30px rgba(0, 198, 255, 0.5),
+                         0 0 40px rgba(0, 198, 255, 0.3);
+        }
+    }
+
+    @keyframes cardGlow {
+        0%, 100% {
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+        }
+        50% {
+            box-shadow: 0 8px 32px 0 rgba(0, 198, 255, 0.3);
+        }
+    }
+
+    .card {
+        animation: cardGlow 3s infinite ease-in-out;
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .cards-container {
+            grid-template-columns: 1fr;
+            padding: 1rem;
+            gap: 1.5rem;
+        }
+
+        .card {
+            padding: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+        }
+
+        .card-content {
+            font-size: 1rem;
+        }
+
+        .card-buttons {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <!-- Cyber Grid Background -->
+    <div class="cyber-grid"></div>
+    
+    <!-- Floating Particles -->
+    <div class="particles-container">
+        {% for i in range(30) %}
+            <div class="particle"></div>
+        {% endfor %}
+    </div>
+
+    <div class="hero-section">
+        <h1 class="hero-title">Complaint Management System</h1>
+        <p class="hero-subtitle">Efficient solutions for managing and resolving complaints</p>
+        <a href="{{ url_for('admin_login') }}" class="btn">📊 Admin Report</a>
+    </div>
+
+    <div class="cards-container">
+        <div class="card">
+            <h2 class="card-title">Citizens</h2>
+            <p class="card-content">Register and track your complaints with ease. Get real-time updates on complaint status.</p>
+            <div class="card-buttons">
+                <a href="{{ url_for('citizen_login') }}" class="btn">Login</a>
+                <a href="{{ url_for('citizen_register') }}" class="btn">Register</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Departments</h2>
+            <p class="card-content">Manage and resolve citizen complaints efficiently. Track complaint resolution progress.</p>
+            <div class="card-buttons">
+                <a href="{{ url_for('department_login') }}" class="btn">Login</a>
+                <a href="{{ url_for('department_register') }}" class="btn">Register</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

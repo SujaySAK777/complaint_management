@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .dashboard-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: var(--glass-border);
+            padding: 2rem;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 10;
+            font-size: 0.9rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .department-title {
+            font-size: 2.5rem;
+            color: #00c6ff;
+            margin: 0.5rem 0 1.5rem 0;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            background: #00c6ff;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .complaint-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            height: fit-content;
+        }
+
+        .complaint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .complaint-id {
+            font-size: 1.2rem;
+            color: #00c6ff;
+        }
+
+        .priority-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            background: #2ecc71;
+        }
+
+        .priority-badge.HIGH {
+            background: linear-gradient(135deg, #ff3b30, #ff9500);
+        }
+
+        .priority-badge.MEDIUM {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+        }
+
+        .priority-badge.LOW {
+            background: linear-gradient(135deg, #34c759, #00c6ff);
+        }
+
+        .description-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .description-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.5rem;
+        }
+
+        .description-text {
+            color: white;
+            line-height: 1.5;
+        }
+
+        .citizen-details {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .current-status {
+            margin-bottom: 1.5rem;
+        }
+
+        .status-text {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+
+        .update-form {
+            margin-top: 1.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        select.form-control,
+        textarea.form-control {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(20, 30, 48, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+            padding-right: 2.5rem;
+            cursor: pointer;
+        }
+
+        select.form-control option {
+            background: rgba(20, 30, 48, 0.95);
+            color: white;
+            padding: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            max-height: 150px;
+            resize: vertical;
+        }
+
+        select.form-control:focus,
+        textarea.form-control:focus {
+            border-color: #00c6ff;
+            box-shadow: 0 0 15px rgba(0, 198, 255, 0.2);
+            outline: none;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00c6ff;
+        }
+
+        .status-text.in-progress .status-dot {
+            background: #ffd700;
+        }
+
+        .status-text.resolved .status-dot {
+            background: #34c759;
+        }
+
+        .status-text.not-resolved .status-dot {
+            background: #ff3b30;
+        }
+
+        .update-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .update-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--neon-shadow);
+        }
+
+        @media (max-width: 1200px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .complaint-card {
+                margin-bottom: 1rem;
+            }
+
+            select.form-control,
+            textarea.form-control {
+                font-size: 16px;
+            }
+        }
+
+        .feedback-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .feedback-content {
+            margin-top: 0.5rem;
+        }
+
+        .rating {
+            font-size: 1.1rem;
+            color: #00c6ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .feedback-comments {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+        }
+
+        .feedback-date {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 0.5rem;
+        }
+
+        .feedback-pending {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 1rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <a href="{{ url_for('home') }}" class="back-btn">← Home</a>
+        <h1 class="department-title">{{ department_name }} Dashboard</h1>
+        <nav class="nav-tabs">
+            <a href="?status=all" class="nav-tab {% if selected_status == 'all' %}active{% endif %}">
+                All Complaints
+            </a>
+            <a href="?status=In-progress" class="nav-tab {% if selected_status == 'In-progress' %}active{% endif %}">
+                In Progress
+            </a>
+            <a href="?status=Resolved" class="nav-tab {% if selected_status == 'Resolved' %}active{% endif %}">
+                Resolved
+            </a>
+            <a href="?status=Not resolved" class="nav-tab {% if selected_status == 'Not resolved' %}active{% endif %}">
+                Not Resolved
+            </a>
+        </nav>
+    </div>
+
+    <div class="grid-container">
+        {% for complaint in complaints %}
+            <div class="complaint-card">
+                <div class="complaint-header">
+                    <span class="complaint-id">Complaint #{{ complaint.complaint_id }}</span>
+                    <span class="priority-badge {{ complaint.priority }}">{{ complaint.priority }}</span>
+                </div>
+    
+                <div class="description-section">
+                    <div class="description-label">Description</div>
+                    <div class="description-text">{{ complaint.description }}</div>
+                </div>
+    
+                <div class="citizen-details">
+                    <div class="description-label">Citizen Details</div>
+                    <div class="description-text">
+                        {{ complaint.citizen.name }}<br>
+                        {{ complaint.citizen.contact_number }}<br>
+                        {{ complaint.citizen.email }}<br>
+                        {{ complaint.citizen.address }}<br>
+                    </div>
+                </div>
+    
+                <div class="current-status">
+                    <div class="description-label">Current Status</div>
+                    <div class="status-text {{ complaint.latest_status.lower().replace(' ', '-') }}">
+                        <span class="status-dot"></span>
+                        {{ complaint.latest_status }}
+                    </div>
+                </div>
+    
+                {% set latest_status = complaint.latest_status %}
+                {% if latest_status == 'Resolved' %}
+                    <!-- Show feedback if available -->
+                    {% if complaint.feedbacks %}
+                        <div class="feedback-section">
+                            <div class="description-label">Citizen Feedback</div>
+                            <div class="feedback-content">
+                                {% set feedback = complaint.feedbacks[0] if complaint.feedbacks else None %}
+                                {% if feedback %}
+                                    <div class="rating">
+                                        Rating: {{ feedback.rating }}/5
+                                    </div>
+                                    <div class="feedback-comments">
+                                        {{ feedback.comments }}
+                                    </div>
+                                    <div class="feedback-date">
+                                        Provided on: {{ feedback.date_provided.strftime('%Y-%m-%d') if feedback.date_provided else 'N/A' }}
+                                    </div>
+                                {% else %}
+                                    <div class="feedback-pending">
+                                        No feedback provided yet
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="feedback-pending">
+                            Awaiting citizen feedback
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <!-- Show update form only for non-resolved complaints -->
+                    <form method="POST" action="{{ url_for('update_complaint_status', complaint_id=complaint.complaint_id) }}" 
+                          class="update-form">
+                        <select name="status" class="form-control" required>
+                            <option value="In-progress" {% if latest_status == 'In-progress' %}selected{% endif %}>
+                                In Progress
+                            </option>
+                            <option value="Resolved" {% if latest_status == 'Resolved' %}selected{% endif %}>
+                                Resolved
+                            </option>
+                            <option value="Not resolved" {% if latest_status == 'Not resolved' %}selected{% endif %}>
+                                Not Resolved
+                            </option>
+                        </select>
+    
+                        <textarea name="remarks" class="form-control" placeholder="Add remarks..." required></textarea>
+    
+                        <button type="submit" class="update-btn">Update Status</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html> 

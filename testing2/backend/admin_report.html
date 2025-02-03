@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #1b1b2f;
+            color: white;
+        }
+
+        .admin-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--dark-gradient);
+            padding: 2rem;
+        }
+
+        .admin-card {
+            width: 100%;
+            max-width: 700px;
+            background: rgba(20, 30, 48, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 198, 255, 0.2);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            text-align: center;
+        }
+
+        .admin-title {
+            font-size: 2.5rem;
+            color: #00c6ff;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .admin-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+        }
+
+        .date-form {
+            margin-bottom: 2rem;
+        }
+
+        .date-form label {
+            font-size: 1.1rem;
+            color: white;
+        }
+
+        .date-form input {
+            padding: 0.5rem;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .report-table {
+            width: 100%;
+            margin: 2rem 0;
+            border-collapse: collapse;
+        }
+
+        .report-table th, .report-table td {
+            padding: 1rem;
+            border: 1px solid rgba(0, 198, 255, 0.2);
+            text-align: center;
+        }
+
+        .report-table th {
+            background-color: rgba(0, 198, 255, 0.1);
+            color: white;
+        }
+
+        .report-table td {
+            background-color: rgba(20, 30, 48, 0.95);
+            color: white;
+        }
+
+        .logout-link {
+            color: #00c6ff;
+            text-decoration: none;
+            font-size: 1.2rem;
+            display: block;
+            margin-top: 2rem;
+            transition: color 0.3s;
+        }
+
+        .logout-link:hover {
+            color: #0072ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-card">
+            <h1 class="admin-title">Admin Report</h1>
+            <p class="admin-subtitle">View system overview and performance metrics for a specific date range.</p>
+            
+            <!-- Date Range Form -->
+            <form method="POST" class="date-form">
+                <label for="start_date">Start Date:</label>
+                <input type="date" name="start_date" class="form-control" value="{{ start_date }}" required>
+                
+                <label for="end_date">End Date:</label>
+                <input type="date" name="end_date" class="form-control" value="{{ end_date }}" required>
+
+                <button type="submit" class="submit-btn">Generate Report</button>
+            </form>
+
+            <!-- Displaying the generated report -->
+            <table class="report-table">
+                <tr>
+                    <th>New Users</th>
+                    <td>{{ report.new_users }}</td>
+                </tr>
+                <tr>
+                    <th>Complaints Filed</th>
+                    <td>{{ report.complaints_filed }}</td>
+                </tr>
+                <tr>
+                    <th>Complaints In Progress</th>
+                    <td>{{ report.complaints_in_progress }}</td>
+                </tr>
+                <tr>
+                    <th>Complaints Resolved</th>
+                    <td>{{ report.complaints_resolved }}</td>
+                </tr>
+                <tr>
+                    <th>Feedback Submitted</th>
+                    <td>{{ report.feedback_submitted }}</td>
+                </tr>
+            </table>
+            
+            <!-- Logout Link -->
+            <a href="{{ url_for('admin_logout') }}" class="logout-link">Logout</a>
+        </div>
+    </div>
+</body>
+</html>
