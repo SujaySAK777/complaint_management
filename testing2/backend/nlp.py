@@ -1,17 +1,23 @@
 # models/nlp.py
 
+import os
+import sys
+import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.sentiment import SentimentIntensityAnalyzer
 
-# Download necessary NLTK resources
-import nltk
-nltk.download('stopwords')
-nltk.download('punkt')
-nltk.download('wordnet')
-nltk.download('vader_lexicon')
-
+# Ensure NLTK data is downloaded
+try:
+    nltk.data.find('tokenizers/punkt')
+    nltk.data.find('corpora/stopwords')
+    nltk.data.find('sentiment/vader_lexicon')
+except LookupError:
+    nltk.download('punkt')
+    nltk.download('stopwords')
+    nltk.download('wordnet')
+    nltk.download('vader_lexicon')
 
 def preprocess_text(text):
     """
@@ -27,7 +33,6 @@ def preprocess_text(text):
     lemmatizer = WordNetLemmatizer()
     tokens = [lemmatizer.lemmatize(word) for word in tokens]
     return " ".join(tokens)
-
 
 def categorize_complaint(text):
     """
@@ -54,7 +59,6 @@ def categorize_complaint(text):
 
     return ("General", 5)  # Default category and department for general complaints
 
-
 def assign_priority(text):
     """
     Assigns priority to the complaint text based on:
@@ -65,19 +69,18 @@ def assign_priority(text):
     high_priority_keywords = ['urgent', 'dangerous', 'critical', 'leaking', 'broken', 'serious']
     for keyword in high_priority_keywords:
         if keyword in text.lower():
-            return "High"
+            return "HIGH"
     
     # Sentiment-based priority assignment
     sentiment, sentiment_priority = analyze_sentiment(text)
     
     # Return sentiment-based priority if no keyword priority is found
-    if sentiment_priority == "High":
-        return "High"
-    elif sentiment_priority == "Medium":
-        return "Medium"
+    if sentiment_priority == "HIGH":
+        return "HIGH"
+    elif sentiment_priority == "MEDIUM":
+        return "MEDIUM"
     else:
-        return "Low"
-
+        return "LOW"
 
 def analyze_sentiment(text):
     """
@@ -87,40 +90,12 @@ def analyze_sentiment(text):
     sentiment = sia.polarity_scores(text)
     
     if sentiment['compound'] == 0.0:
-        priority = "Low"
+        priority = "LOW"
     elif sentiment['compound'] < -0.5:
-        priority = "High"
+        priority = "HIGH"
     elif -0.5 <= sentiment['compound'] <= 0.5:
-        priority = "Medium"
+        priority = "MEDIUM"
     else:
-        priority = "Low"
+        priority = "LOW"
     
-    return sentiment, priority
-
-
-def process_complaint(text):
-    """
-    Processes the complaint text by:
-    - Preprocessing the text
-    - Categorizing the complaint
-    - Assigning priority based on sentiment and keywords
-    """
-    # Preprocess the text
-    preprocessed_text = preprocess_text(text)
-
-    # Categorize complaint
-    category = categorize_complaint(preprocessed_text)
-
-    # Assign priority (keywords and sentiment)
-    final_priority = assign_priority(preprocessed_text)
-
-    # Analyze sentiment (optional, for reporting purposes)
-    sentiment, _ = analyze_sentiment(preprocessed_text)
-
-    return {
-        "Original Complaint": text,
-        "Preprocessed Text": preprocessed_text,
-        "Category": category,
-        "Sentiment": sentiment,
-        "Final Priority": final_priority
-    }
+    return sentiment, priority 
